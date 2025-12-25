@@ -342,8 +342,11 @@ void AudioPlayer_Exit(void) {
 	// Make sure last playposition for audiobook is saved when playback is active while shutdown was initiated
 	if (gPrefsSettings.getBool("savePosShutdown", false) && !gPlayProperties.pausePlay && (gPlayProperties.playMode == AUDIOBOOK || gPlayProperties.playMode == AUDIOBOOK_LOOP || gPlayProperties.playMode == AUDIOBOOK_RECURSIVE)) {
 		AudioPlayer_SetTrackControl(PAUSEPLAY);
-		// Call the loop explicitely to make sure that PAUSE is set (because this saves the current playpos)
-		AudioPlayer_Loop();
+		// Call the loop repeatedly to make sure that playback is paused (because this saves the current playpos)
+		while (!gPlayProperties.pausePlay) {
+			AudioPlayer_Loop();
+			vTaskDelay(portTICK_PERIOD_MS * 100u);
+		}
 	}
 }
 
