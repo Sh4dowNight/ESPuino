@@ -790,6 +790,17 @@ void AudioPlayer_Loop() {
 				audioReturnCode
 					= audio->connecttoFS(gFSystem, gPlayProperties.playlist->at(gPlayProperties.currentTrackNumber), fileStartTime);
 				// consider track as finished, when audio lib call was not successful
+				
+				// Initialize position immediately after connection to avoid showing 0 in WebUI/LED
+				if (audioReturnCode && fileStartTime > 0) {
+					AudioPlayer_CurrentTime = audio->getAudioCurrentTime();
+					AudioPlayer_FileDuration = audio->getAudioFileDuration();
+					gPlayProperties.audioFileDuration = AudioPlayer_FileDuration;
+					// Calculate relative position using same formula as in regular update loop (line 434)
+					if (AudioPlayer_FileDuration > 0) {
+						gPlayProperties.currentRelPos = ((float) AudioPlayer_CurrentTime / AudioPlayer_FileDuration) * 100.0f;
+					}
+				}
 			}
 		}
 
