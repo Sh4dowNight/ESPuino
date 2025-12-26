@@ -887,10 +887,10 @@ void AudioPlayer_Loop() {
 		} else {
 			gPlayProperties.isWebstream = false;
 		}
-		gPlayProperties.currentRelPos = 0;
 		audioReturnCode = false;
 
 		if (gPlayProperties.playMode == WEBSTREAM || (gPlayProperties.playMode == LOCAL_M3U && gPlayProperties.isWebstream)) { // Webstream
+			gPlayProperties.currentRelPos = 0;
 			audioReturnCode = audio->connecttohost(gPlayProperties.playlist->at(gPlayProperties.currentTrackNumber));
 			gPlayProperties.playlistFinished = false;
 			gTriedToConnectToHost = true;
@@ -910,6 +910,20 @@ void AudioPlayer_Loop() {
 				audioReturnCode
 					= audio->connecttoFS(gFSystem, gPlayProperties.playlist->at(gPlayProperties.currentTrackNumber), fileStartTime);
 				// consider track as finished, when audio lib call was not successful
+
+				// Update currentRelPos based on the actual playback position
+				// This ensures WebUI and LED ring show correct progress when resuming from saved position
+				if (audioReturnCode) {
+					uint32_t duration = audio->getAudioFileDuration();
+					if (duration > 0) {
+						float relPos = ((float) audio->getAudioCurrentTime() / duration) * 100.0f;
+						gPlayProperties.currentRelPos = (relPos > 100.0f) ? 100.0f : relPos;
+					} else {
+						gPlayProperties.currentRelPos = 0;
+					}
+				} else {
+					gPlayProperties.currentRelPos = 0;
+				}
 			}
 		}
 
