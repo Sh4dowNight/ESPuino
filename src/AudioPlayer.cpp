@@ -795,6 +795,8 @@ void AudioPlayer_Loop() {
 				if (audioReturnCode && fileStartTime > 0) {
 					AudioPlayer_CurrentTime = audio->getAudioCurrentTime();
 					AudioPlayer_FileDuration = audio->getAudioFileDuration();
+					gPlayProperties.audioFileDuration = AudioPlayer_FileDuration;
+					// Calculate relative position using same formula as in regular update loop (line 434)
 					if (AudioPlayer_FileDuration > 0) {
 						gPlayProperties.currentRelPos = ((float) AudioPlayer_CurrentTime / AudioPlayer_FileDuration) * 100.0f;
 					}
