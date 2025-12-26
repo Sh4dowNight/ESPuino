@@ -905,7 +905,6 @@ void AudioPlayer_Loop() {
 				if (gPlayProperties.startAtFilePos > 0) {
 					fileStartTime = gPlayProperties.startAtFilePos;
 					Log_Printf(LOGLEVEL_NOTICE, trackStartatPos, gPlayProperties.startAtFilePos);
-					gPlayProperties.startAtFilePos = 0;
 				}
 				audioReturnCode
 					= audio->connecttoFS(gFSystem, gPlayProperties.playlist->at(gPlayProperties.currentTrackNumber), fileStartTime);
@@ -918,6 +917,8 @@ void AudioPlayer_Loop() {
 			gPlayProperties.trackFinished = true;
 			return;
 		} else {
+			// Reset startAtFilePos only after successful connection
+			gPlayProperties.startAtFilePos = 0;
 			if (gPlayProperties.currentTrackNumber) {
 				Led_Indicate(LedIndicatorType::PlaylistProgress);
 			}
